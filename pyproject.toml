@@ -1,76 +1,22 @@
 [project]
 name = "upstox-mcp-server"
 version = "0.1.0"
-description = "Model Context Protocol (MCP) server for Upstox trading integration"
+description = "The MCP server hepls taking trades from natural"
 readme = "README.md"
 requires-python = ">=3.12"
-authors = [
-    { name = "Your Name", email = "your.email@example.com" }
-]
-license = { text = "MIT" }
-keywords = ["mcp", "upstox", "trading", "model-context-protocol"]
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.12",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-]
 dependencies = [
     "mcp[cli]>=1.11.0",
 ]
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "black>=23.0.0",
-    "isort>=5.12.0",
-    "mypy>=1.0.0",
-]
-
-[project.urls]
-Homepage = "https://github.com/YOUR_USERNAME/upstox-mcp-server"
-Repository = "https://github.com/YOUR_USERNAME/upstox-mcp-server"
-Documentation = "https://github.com/YOUR_USERNAME/upstox-mcp-server#readme"
-Issues = "https://github.com/YOUR_USERNAME/upstox-mcp-server/issues"
-
 [project.scripts]
-upstox-mcp-server = "mcpserver.__main__:main"
+mcp-server = "mcpserver.__main__:main"
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/mcpserver"]
+[tool.setuptools]
+package-dir = {"" = "src"}
 
-[tool.black]
-line-length = 88
-target-version = ["py312"]
-include = '\.pyi?$'
-extend-exclude = '''
-/(
-  # directories
-  \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | build
-  | dist
-)/
-'''
-
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-line_length = 88
-
-[tool.mypy]
-python_version = "3.12"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
+[tool.setuptools.packages.find]
+where = ["src"]
