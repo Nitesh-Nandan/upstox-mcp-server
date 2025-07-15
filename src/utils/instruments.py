@@ -1,6 +1,7 @@
 import csv
 from pathlib import Path
 from typing import Dict, Union, List
+import os
 
 import pandas as pd
 
@@ -15,11 +16,15 @@ class InstrumentCache:
     and provides fast lookup between trading symbols and instrument keys.
     """
 
-    file_path = Path("instruments.csv")
+    # Use user's home directory or cache directory for writable location
+    file_path = Path.home() / ".upstox_mcp" / "instruments.csv"
     INSTRUMENTS_URL = "https://assets.upstox.com/market-quote/instruments/exchange/complete.csv.gz"
 
     def __init__(self):
         """Initialize cache and load instruments from file or download fresh data."""
+        # Ensure the directory exists
+        self.file_path.parent.mkdir(parents=True, exist_ok=True)
+        
         self.symbol_dict: Dict[str, str] = {}
         self.instrument_dict: Dict[str, str] = {}
         self.load_instruments()
