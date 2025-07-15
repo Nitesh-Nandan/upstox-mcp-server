@@ -19,7 +19,7 @@ def refresh_access_token(token: str):
     """
     return save_token(token)
 
-
+@mcp.tool()
 def get_ltp(symbol: str, exchange: Exchange = Exchange.NSE_EQ):
     """
     Get the last traded price of a given symbol and exchange
