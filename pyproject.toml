@@ -1,7 +1,7 @@
 [project]
 name = "upstox-mcp-server"
 version = "0.1.0"
-description = "The MCP server hepls taking trades from natural"
+description = "A Model Context Protocol server for Upstox trading functionality"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
