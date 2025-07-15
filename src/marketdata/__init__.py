@@ -1,1 +1,1 @@
-from .marketdata import sayHello
+from .marketdata import get_last_traded_price

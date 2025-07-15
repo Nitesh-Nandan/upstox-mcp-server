@@ -82,5 +82,6 @@ def save_token(token: str) -> str:
 
 
 if __name__ == "__main__":
-    save_token("nitesh-nandan")
+    token = "eyJ0eXAiOiJKV1QiLCJrZXlfaWQiOiJza192MS4wIiwiYWxnIjoiSFMyNTYifQ.eyJzdWIiOiJIVzUyMTMiLCJqdGkiOiI2ODc2NjkzNmZhODQ0MjZmZTQzYjBhMmUiLCJpc011bHRpQ2xpZW50IjpmYWxzZSwiaXNQbHVzUGxhbiI6ZmFsc2UsImlhdCI6MTc1MjU5MDY0NiwiaXNzIjoidWRhcGktZ2F0ZXdheS1zZXJ2aWNlIiwiZXhwIjoxNzUyNjE2ODAwfQ.1Vfj01dy0SxdDqdJMtLRm1Rr2j3gIScXBvA1yOC8mKQ"
+    save_token(token)
     print(os.getenv("UPSTOX_ACCESS_TOKEN"))

@@ -1,14 +1,10 @@
-import pandas as pd
-from pydantic import BaseModel
 import csv
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Union, List
 
+import pandas as pd
 
-class Instrument(BaseModel):
-    """Represents a trading instrument with symbol and key."""
-    tradingsymbol: str
-    instrumentKey: str
+from models.instruments import Instrument
 
 
 class InstrumentCache:
@@ -18,7 +14,7 @@ class InstrumentCache:
     Downloads instrument data from Upstox API, filters out complex symbols,
     and provides fast lookup between trading symbols and instrument keys.
     """
-    
+
     file_path = Path("instruments.csv")
     INSTRUMENTS_URL = "https://assets.upstox.com/market-quote/instruments/exchange/complete.csv.gz"
 
@@ -30,16 +26,17 @@ class InstrumentCache:
 
     def _is_alphanumeric(self, text: str) -> bool:
         """Check if text contains both letters and digits (complex instruments)."""
-        return isinstance(text, str) and text.isalnum() and any(c.isalpha() for c in text) and any(c.isdigit() for c in text)
+        return isinstance(text, str) and text.isalnum() and any(c.isalpha() for c in text) and any(
+            c.isdigit() for c in text)
 
     def refresh_instruments(self) -> None:
         """Download fresh instrument data from Upstox and save to CSV."""
         df = pd.read_csv(self.INSTRUMENTS_URL, compression="gzip")
-        
+
         # Select relevant columns and filter out complex symbols
         df = df[["instrument_key", "tradingsymbol", "name", "exchange"]]
         df = df[~df['tradingsymbol'].apply(self._is_alphanumeric)]
-        
+
         df.to_csv(self.file_path, index=False, header=True)
 
     def load_instruments(self) -> None:
@@ -54,24 +51,31 @@ class InstrumentCache:
                 instrument_key = row["instrument_key"].strip().upper()
                 trading_symbol = row["tradingsymbol"].strip()
                 exchange = row["exchange"].strip()
-                
+
                 self.instrument_dict[instrument_key] = trading_symbol
                 symbol_key = f"{exchange}|{trading_symbol}".upper()
                 self.symbol_dict[symbol_key] = instrument_key
 
-    def get_symbol(self, instrument_key: str) -> Instrument:
+    def get_symbol(self, instrument_key: Union[str, List[str]]) -> Union[Instrument, List[Instrument]]:
         """
-        Get trading symbol from instrument key.
+        Get trading symbol(s) from instrument key(s).
         
         Args:
-            instrument_key: The instrument key (e.g., 'NSE_EQ|INE040A01034')
+            instrument_key: Single instrument key or list of instrument keys
             
         Returns:
-            Instrument object with trading symbol and key
+            Single Instrument object or list of Instrument objects
             
         Raises:
-            ValueError: If instrument key not found
+            ValueError: If any instrument key not found
         """
+        if isinstance(instrument_key, list):
+            return [self._get_single_symbol(key) for key in instrument_key]
+        else:
+            return self._get_single_symbol(instrument_key)
+
+    def _get_single_symbol(self, instrument_key: str) -> Instrument:
+        """Helper method to get a single symbol from instrument key."""
         key = instrument_key.strip().upper()
         if key not in self.instrument_dict:
             raise ValueError(f"Invalid instrument key: {key}")
@@ -80,23 +84,31 @@ class InstrumentCache:
         if '|' in key:
             exchange = key.split("|")[0]
             trading_symbol = f"{exchange}|{trading_symbol}"
-        
+
         return Instrument(tradingsymbol=trading_symbol, instrumentKey=key)
 
-    def get_instrument(self, symbol: str, exchange: str = "NSE_EQ") -> Instrument:
+    def get_instrument(self, symbol: Union[str, List[str]], exchange: str = "NSE_EQ") -> Union[
+        Instrument, List[Instrument]]:
         """
-        Get instrument key from trading symbol.
+        Get instrument key(s) from trading symbol(s).
         
         Args:
-            symbol: Trading symbol (e.g., 'HDFCBANK')
+            symbol: Single trading symbol or list of trading symbols
             exchange: Exchange code (default: 'NSE_EQ')
             
         Returns:
-            Instrument object with trading symbol and key
+            Single Instrument object or list of Instrument objects
             
         Raises:
-            ValueError: If symbol not found
+            ValueError: If any symbol not found
         """
+        if isinstance(symbol, list):
+            return [self._get_single_instrument(sym, exchange) for sym in symbol]
+        else:
+            return self._get_single_instrument(symbol, exchange)
+
+    def _get_single_instrument(self, symbol: str, exchange: str) -> Instrument:
+        """Helper method to get a single instrument from trading symbol."""
         full_symbol = f"{exchange.strip()}|{symbol.strip()}".upper()
         if full_symbol not in self.symbol_dict:
             raise ValueError(f"Invalid symbol: {full_symbol}")
@@ -106,9 +118,15 @@ class InstrumentCache:
             instrumentKey=self.symbol_dict[full_symbol]
         )
 
+
 instrumentCache = InstrumentCache()
 
 if __name__ == "__main__":
     cache = InstrumentCache()
+    # Test single values
     print(cache.get_instrument('HDFCBANK'))
     print(cache.get_symbol('NSE_EQ|INE040A01034'))
+
+    # Test lists
+    print(cache.get_instrument(['HDFCBANK', 'ICICIBANK']))
+    print(cache.get_symbol(['NSE_EQ|INE040A01034', 'NSE_EQ|INE090A01021']))

@@ -1,17 +1,10 @@
 from mcp.server.fastmcp import FastMCP
 from auth import save_token
-
+from models import Exchange
+from utils import instrumentCache
+from marketdata import get_last_traded_price
 
 mcp = FastMCP("Upstox-MCP-Server")
-
-
-@mcp.tool()
-def helloWorld() -> str:
-    """
-    Returns 'Hello from upstox-mcp-server!'
-    """
-    print("Hello from upstox-mcp-server!")
-    return "Hello from upstox-mcp-server!"
 
 
 @mcp.tool()
@@ -27,8 +20,17 @@ def refresh_access_token(token: str):
     return save_token(token)
 
 
+def get_ltp(symbol: str, exchange: Exchange = Exchange.NSE_EQ):
+    """
+    Get the last traded price of a given symbol and exchange
+    Args:
+        symbol (str): The symbol of the instrument
+        exchange (Exchange): The exchange of the instrument defaults to NSE_EQ
+    """
+    instruments = instrumentCache.get_instrument(symbol, exchange)
 
-    
+    return get_last_traded_price(instruments)
+
 
 if __name__ == "__main__":
     mcp.run()
