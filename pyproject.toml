@@ -6,6 +6,9 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "mcp[cli]>=1.11.0",
+    "pandas>=2.3.1",
+    "pydantic>=2.11.7",
+    "python-dotenv>=1.1.1",
 ]
 
 [project.scripts]
